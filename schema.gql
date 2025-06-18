@@ -1,0 +1,104 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type AuthPayload {
+  access_token: String!
+  user: User!
+}
+
+type Conversation {
+  createdAt: DateTime!
+  id: ID!
+  isGroup: Boolean!
+  messages: [Message!]
+  name: String
+  participants: [ConversationUser!]!
+  updatedAt: DateTime!
+}
+
+type ConversationUser {
+  conversationId: String!
+  id: ID!
+  joinedAt: DateTime!
+  lastReadAt: DateTime
+  user: User!
+  userId: String!
+}
+
+input CreateConversationInput {
+  isGroup: Boolean!
+  participantIds: [String!]!
+}
+
+input CreateMessageInput {
+  content: String!
+  conversationId: String!
+  type: String! = "TEXT"
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+input LoginInput {
+  email: String!
+  password: String!
+}
+
+type Message {
+  content: String!
+  conversation: Conversation!
+  conversationId: String!
+  createdAt: DateTime!
+  id: ID!
+  sender: User!
+  senderId: String!
+  type: String!
+  updatedAt: DateTime!
+}
+
+type Mutation {
+  addParticipantToConversation(conversationId: String!, participantId: String!): Boolean!
+  createConversation(createConversationInput: CreateConversationInput!): Conversation!
+  createMessage(createMessageInput: CreateMessageInput!): Boolean!
+  login(loginInput: LoginInput!): AuthPayload!
+  markConversationAsRead(conversationId: String!): Boolean!
+  register(registerInput: RegisterInput!): AuthPayload!
+}
+
+type Query {
+  getConversation(id: String!): Conversation
+  getMessage(id: String!): Message
+  getMessages(conversationId: String!, limit: Float! = 50, offset: Float! = 0): [Message!]!
+  getMyConversations: [Conversation!]!
+  me: User!
+  user(id: String!): User
+  users: [User!]!
+}
+
+input RegisterInput {
+  email: String!
+  firstName: String
+  lastName: String
+  password: String!
+  username: String!
+}
+
+type Subscription {
+  messageAdded(conversationId: String!): Message!
+}
+
+type User {
+  avatar: String
+  createdAt: DateTime!
+  email: String!
+  firstName: String
+  id: ID!
+  isOnline: Boolean!
+  lastName: String
+  lastSeen: DateTime
+  updatedAt: DateTime!
+  username: String!
+}
