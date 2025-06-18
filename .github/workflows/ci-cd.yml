@@ -1,0 +1,68 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: messaging
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+
+    env:
+      DATABASE_URL: postgresql://postgres:password@localhost:5432/messaging?schema=public
+      JWT_SECRET: hehe
+      REDIS_HOST: localhost
+      REDIS_PORT: 6379
+      PORT: 3001
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Use Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build project
+        run: npm run build
+
+      - name: Run migrations
+        run: npx prisma migrate deploy
+
+      - name: Seed database
+        run: npm run seed
+
+      - name: Run tests
+        run: npm test
+
+    # Optionnel: build Docker image and push to DockerHub or deploy
+    #- name: Build Docker image
+    #  run: docker build -t yourdockerhubusername/messaging-backend .
+
+    #- name: Push Docker image
+    #  run: docker push yourdockerhubusername/messaging-backend
+
+    # Ajoute ici étapes pour déployer sur ton serveur ou service cloud (ex: ssh + docker-compose up)
